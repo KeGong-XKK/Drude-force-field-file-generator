@@ -1,0 +1,7 @@
+tolerance 2.0
+output h2o_swdp.pdb
+structure SWDPmodel.pdb
+  number 800
+  inside box 0. 0. 0. 100. 100. 100.
+  inside sphere 50. 50. 50. 15.
+end structure

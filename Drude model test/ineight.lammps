@@ -1,0 +1,99 @@
+units       real
+
+variable      vTEMP equal 298.0
+variable      vTEMP_D equal 1.0 
+variable      vPRESS equal 1.0
+
+dimension      3
+
+boundary       p p p 
+
+atom_style     full
+
+bond_style      harmonic 
+angle_style     harmonic 
+special_bonds lj/coul 0.0 0.0 0.5
+dihedral_style    harmonic
+#improper_style    cvff
+
+pair_style hybrid/overlay lj/cut/coul/long 12 thole 2.600 10.0
+pair_modify mix geometric tail yes
+kspace_style       pppm      0.0001
+
+neighbor   2  bin
+neigh_modify   delay 0 every 1 check yes
+
+read_data  data-p.lmp
+
+pair_coeff    1    1 lj/cut/coul/long 0.065997 3.5 # CTO CTO
+pair_coeff    1    2 lj/cut/coul/long 0.1 3.3      # CTO OH
+pair_coeff    1    3 lj/cut/coul/long 0.1 2.9      # CTO h
+pair_coeff    1    4 lj/cut/coul/long 0.0  0.0     # CTO ho
+pair_coeff    2    2 lj/cut/coul/long 0.17 3.12    # OH OH
+pair_coeff    2    3 lj/cut/coul/long 0.07 2.8     # OH h
+pair_coeff    2    4 lj/cut/coul/long 0.0  0.0     # OH ho
+pair_coeff    3    3 lj/cut/coul/long 0.03 2.5     # h h
+pair_coeff    3    4 lj/cut/coul/long 0.0  0.0     # h ho
+pair_coeff    4    4 lj/cut/coul/long 0.0  0.0     # ho ho
+pair_coeff    *   5*6 lj/cut/coul/long 0.0 0.0
+pair_coeff    1    1 thole   1.000
+pair_coeff    1    2 thole   1.014
+pair_coeff    1    5 thole   1.000
+pair_coeff    1    6 thole   1.014
+pair_coeff    2    2 thole   1.028
+pair_coeff    2    5 thole   1.014
+pair_coeff    2    6 thole   1.028
+pair_coeff    5    5 thole   1.000
+pair_coeff    5    6 thole   1.014
+pair_coeff    6    6 thole   1.028
+
+
+group gATOMS type 1 2 3 4 
+group gDRUDES type 5 6
+
+
+fix fDRUDE all drude C C N N D D 
+
+min_style   sd
+minimize    1.0e-10 1.0e-10 10000 10000
+reset_timestep       0
+
+velocity   gATOMS  create ${vTEMP}  12345
+velocity   gDRUDES  create ${vTEMP_D}  12345
+
+#fix fshake gATOMS shake 0.0001 20 0 b 1 3  
+
+comm_modify vel yes
+compute cTEMP_ATOM gATOMS temp
+compute cTEMP all temp/drude
+
+fix fDTDIR all drude/transform/direct
+fix fNPT gATOMS npt temp ${vTEMP} ${vTEMP} 100 iso ${vPRESS} ${vPRESS} 1000
+fix_modify fNPT temp cTEMP_ATOM press thermo_press
+fix fNVT gDRUDES nvt temp ${vTEMP_D} ${vTEMP_D} 100.0
+fix fDTINV all drude/transform/inverse
+
+thermo         50
+thermo_style custom step cpu etotal ke temp pe ebond eangle edihed eimp evdwl ecoul elong press vol c_cTEMP[1] c_cTEMP[2]
+
+fix MOMENTUM all momentum 100 linear 1 1 1
+
+dump DUMP all custom 100 dump.lammpstrj id mol type element x y z ix iy iz 
+dump_modify DUMP element C O H H D D
+
+fix efield all efield 0.0 0.0 0.06
+
+timestep 0.5
+run            500000
+write_data  restart2.data  
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,16 @@
+REMARK   Materials Studio PDB file
+REMARK   Created:  Thu Jan 06 08:27:18 中国标准时间 2022
+ATOM      1  C   MOL     1      -2.100   0.791   0.001  1.00  0.00           C    
+ATOM      2  O   MOL     1      -0.649   1.207  -0.038  1.00  0.00           O    
+ATOM      3  H   MOL     1      -2.192  -0.219   0.521  1.00  0.00           H    
+ATOM      4  H   MOL     1      -2.500   0.708  -1.064  1.00  0.00           H    
+ATOM      5  H   MOL     1      -2.704   1.570   0.574  1.00  0.00           H    
+ATOM      6  H   MOL     1      -0.260   1.288   0.999  1.00  0.00           H    
+TER       7 
+CONECT    1    2    3    4    5
+CONECT    2    1    6
+CONECT    3    1
+CONECT    4    1
+CONECT    5    1
+CONECT    6    2
+END
